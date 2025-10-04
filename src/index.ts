@@ -10,7 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 app.get('/health', (_req: Request, res: Response) => {
-  res.status(200).json({ status: 'ok' });
+  res.status(200).json({ status: '1x finance for this' });
 });
 
 const port: number = parseInt(process.env.PORT || '3000', 10);
