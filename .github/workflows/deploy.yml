@@ -20,13 +20,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Preflight – check required secrets
+      # Preflight: ensure required repository secrets exist
+      - name: Preflight secrets check
         shell: bash
         run: |
-          : "${{ secrets.EC2_HOST:?EC2_HOST missing }}"
-          : "${{ secrets.EC2_USER:?EC2_USER missing }}"
-          : "${{ secrets.EC2_SSH_KEY:?EC2_SSH_KEY missing }}"
-          echo "All required secrets are present."
+          missing=0
+          for k in EC2_HOST EC2_USER EC2_SSH_KEY; do
+            v="${{ secrets.EC2_HOST }}"; if [ "$k" = EC2_USER ]; then v="${{ secrets.EC2_USER }}"; fi
+            if [ "$k" = EC2_SSH_KEY ]; then v="${{ secrets.EC2_SSH_KEY }}"; fi
+            if [ -z "$v" ]; then
+              echo "::error::Missing required secret: $k"
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then exit 1; fi
 
       - name: Compute lowercase image name
         id: vars
@@ -40,7 +47,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build & push (lowercase only)
+      - name: Build & push image (lowercase only)
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -62,11 +69,15 @@ jobs:
             cd /opt/1xfinance-api
             docker compose pull
             docker compose up -d
+
+            # Health check (public)
             for i in {1..24}; do
               code=$(curl -sk -o /dev/null -w "%{http_code}" https://api.1xfinance.com/health)
-              [ "$code" = "200" ] && exit 0
+              if [ "$code" = "200" ]; then
+                echo "Health OK"
+                exit 0
+              fi
               sleep 5
             done
             echo "Health check failed" >&2
             exit 1
-
