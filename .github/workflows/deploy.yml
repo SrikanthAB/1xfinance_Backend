@@ -1,0 +1,54 @@
+name: CI/CD - 1xfinance API
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch: {}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    env:
+      IMAGE_NAME_MIXED: ghcr.io/${{ github.repository }}
+      IMAGE_NAME_LC: ghcr.io/${{ toLower(github.repository) }}
+      TAG: main
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Build & push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME_MIXED }}:${{ env.TAG }}
+            ${{ env.IMAGE_NAME_MIXED }}:${{ github.sha }}
+            ${{ env.IMAGE_NAME_LC }}:${{ env.TAG }}
+            ${{ env.IMAGE_NAME_LC }}:${{ github.sha }}
+
+      - name: Deploy on EC2 via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: ${{ secrets.EC2_PORT || 22 }}
+          script_stop: true
+          script: |
+            cd /opt/1xfinance-api
+            docker compose pull
+            docker compose up -d
