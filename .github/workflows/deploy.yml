@@ -14,8 +14,8 @@ jobs:
       packages: write
 
     env:
-      REGISTRY: ghcr.io
-      IMAGE_NAME: ghcr.io/${{ github.repository }}
+      IMAGE_NAME_MIXED: ghcr.io/${{ github.repository }}
+      IMAGE_NAME_LC: ghcr.io/${{ toLower(github.repository) }}
       TAG: main
 
     steps:
@@ -35,8 +35,10 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ env.IMAGE_NAME }}:${{ env.TAG }}
-            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.IMAGE_NAME_MIXED }}:${{ env.TAG }}
+            ${{ env.IMAGE_NAME_MIXED }}:${{ github.sha }}
+            ${{ env.IMAGE_NAME_LC }}:${{ env.TAG }}
+            ${{ env.IMAGE_NAME_LC }}:${{ github.sha }}
 
       - name: Deploy on EC2 via SSH
         uses: appleboy/ssh-action@v1.2.0
