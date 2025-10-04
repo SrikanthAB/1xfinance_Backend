@@ -8,19 +8,24 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
     permissions:
       contents: read
       packages: write
 
     env:
       IMAGE_NAME_MIXED: ghcr.io/${{ github.repository }}
-      IMAGE_NAME_LC: ghcr.io/${{ toLower(github.repository) }}
       TAG: main
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Compute lowercase repo
+        id: vars
+        shell: bash
+        run: |
+          echo "repo_lc=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+          echo "image_name_lc=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
 
       - name: Log in to GHCR
         uses: docker/login-action@v3
@@ -37,8 +42,8 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME_MIXED }}:${{ env.TAG }}
             ${{ env.IMAGE_NAME_MIXED }}:${{ github.sha }}
-            ${{ env.IMAGE_NAME_LC }}:${{ env.TAG }}
-            ${{ env.IMAGE_NAME_LC }}:${{ github.sha }}
+            ${{ steps.vars.outputs.image_name_lc }}:${{ env.TAG }}
+            ${{ steps.vars.outputs.image_name_lc }}:${{ github.sha }}
 
       - name: Deploy on EC2 via SSH
         uses: appleboy/ssh-action@v1.2.0
@@ -49,6 +54,19 @@ jobs:
           port: ${{ secrets.EC2_PORT || 22 }}
           script_stop: true
           script: |
+            set -euo pipefail
             cd /opt/1xfinance-api
+            # If your GHCR package is private, login first (optional):
+            if [ -n "${{ secrets.EC2_GHCR_TOKEN || '' }}" ]; then
+              echo "${{ secrets.EC2_GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.EC2_GHCR_USER }}" --password-stdin
+            fi
             docker compose pull
             docker compose up -d
+            # Health gate
+            for i in {1..24}; do
+              code=$(curl -sk -o /dev/null -w "%{http_code}" https://api.1xfinance.com/health)
+              [ "$code" = "200" ] && exit 0
+              sleep 5
+            done
+            echo "Health check failed"
+            exit 1
