@@ -1,8 +1,0 @@
-@openzeppelin-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/
-@openzeppelin/=lib/openzeppelin-contracts/contracts/
-@onchain-id/=lib/solidity/contracts/
-@ds-test/=lib/forge-std/lib/ds-test/src/
-@forge-std/=lib/forge-std/src/
-@solmate/=lib/solmate/src/
-
-solidity/=lib/solidity/contracts/

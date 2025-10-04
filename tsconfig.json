@@ -1,51 +1,14 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "*": ["src/*"]
-    },
-    "moduleResolution": "node",
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "target": "es2020",
+    "target": "ES2020",
     "module": "CommonJS",
+    "rootDir": "src",
     "outDir": "dist",
-    "sourceMap": true,
-    "forceConsistentCasingInFileNames": true,
     "strict": true,
+    "esModuleInterop": true,
     "skipLibCheck": true,
-    "ignoreDeprecations": "5.0",
-    "typeRoots": [
-      "./node_modules/@types",
-      "./src/types"
-    ],
-    "types": [
-      "node",
-      "express",
-    ],
-    "resolveJsonModule": true,
-    "declaration": true,
-    "removeComments": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "lib": [
-      "es2020",
-      "esnext.asynciterable"
-    ]
+    "forceConsistentCasingInFileNames": true
   },
-  "include": [
-    "src/**/*",
-    "src/types/**/*.d.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "coverage",
-    "**/*.spec.ts"
-  ],
-  "ts-node": {
-    "files": true,
-  }
+  "include": ["src"]
 }
+
