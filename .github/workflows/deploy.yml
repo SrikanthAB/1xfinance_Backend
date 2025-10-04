@@ -26,8 +26,62 @@ jobs:
         run: |
           missing=0
           for k in EC2_HOST EC2_USER EC2_SSH_KEY; do
-            v="${{ secrets.EC2_HOST }}"; if [ "$k" = EC2_USER ]; then v="${{ secrets.EC2_USER }}"; fi
-            if [ "$k" = EC2_SSH_KEY ]; then v="${{ secrets.EC2_SSH_KEY }}"; fi
+            v="${{ secrets.EC2_HOST || 13.53.112.141  }}"; if [ "$k" = EC2_USER || ec2-user ]; then v="${{ secrets.EC2_USER || ec2-user}}"; fi
+            if [ "$k" = EC2_SSH_KEY || -----BEGIN RSA PRIVATE KEY-----
+            MIIEowIBAAKCAQEAyfa+F1nQBV5Pn27AEnzpJQD41bSzUiB/xXTuz7I6El94A/5h
+            RWG0B6pwKR0WqZGRsLtUvnKTVVNN3+t2Q6DHXfWIWPVw+sToHka/2P5PnK4axHqr
+            Oa47GC3C0FA5kV7Nd9fvc7Cogo7dFzwFKSekl8S40u9ma7j3T/EgyVHQeuxY+ERx
+            qCSvI52YdrLEq1tGRPgrhULC6plffT0FNNfAYVdEXTcrGGZTYxg8o6oYkFLuC6Hx
+            q6/5YrBal5tR0iKaIJBVeGYtjYfIFa2vrO85GFi5MU+vBMDQhp/FE/AtJT/Tvb+T
+            CzQQNmGlikvgKVJAuIQOXPqn/WL4e/PBQ07rPQIDAQABAoIBAHI/Ox8Ydj1jMWV+
+            D/clY/nDx/+UHdB6g+zeDe29423bRZf0wW+vKlkfyBzp0JURvLmd7v1g8QlWe3oM
+            x7TP8ZesOnogNc4VrzzZRtNoYP6/2nKE9fFGJzWxRT/z8ezTFSYTJ+ho6ZoZWOY4
+            1K6IN2qHJQpl1KlhU72MKMDZoDa4E00+7QyDDOsxE41JqDxkDkg8kQVgsmz/DcTi
+            N2adJw46DGz40GdS5f6GQwzphVaLEzblr/c0xctpemNoVGORDyFzNbJzrCZvVfnx
+            1JIVidOjwFLS0FdZKavhfFdzdi33Iz56EMRRzwH4W/mScijPV8M7aJJQYTmHCSnf
+            WNmPct0CgYEA/0g6oxNPLO5hdFiI1iJ3LR8O2bAC+6gGjtk6vh+kyRVCZ8V1SRHf
+            A6sKP5mkMGtsgJZLD1D1C6bpnTsuvQgMzOd7wmvdea9xdn5brOS/mDX1EpRZX6gv
+            En5TKaltzj/VUAslZYDf3e9ZQJ/wN+hC5fE5kojva4peSxa3VxhN8ecCgYEAyogh
+            i5qZaKulnwlWAvXTsYn9qvQAF5ku7LRHIqNJF8UqRT/S3EW+lEWVc9m3cnayh2+v
+            RBl/Z64DHvfZuIZnPOYXFkB8pE1gYAq8nj+Vsjxxskr9CqHP51Uq+9JBei7UuvFT
+            6/cKuMfEAu4HW/g2afWRrbwag4o5pKBZRFdnHTsCgYEAxoRQtQgLBhHKT0OaBYt/
+            yeLhFX++khy0HNnoyHirGIQjw7bV4iC3oI6dxZ+hAtZG5if57ssyBAGkodSoH+/m
+            pGFO6H4hGMPKJC9W8zhfleo/zlb2uWB8WpFJ8pgC/+S76ScBydFSRbAfZBX8JD3F
+            6DKSZtV9+c78TMA5is0nr/kCgYAxBnLYUDwCUkptDN19KfRsbXKyBw5ep/3r3le5
+            0rzGvDtXN/PazicrzQw4VuNJGeJtVmOeoG1us3id7nENcbtbynacNE/3laNWnEK8
+            K7gYxPjgp7ZI9JJW9Q7KlkKzSNLFzdT6sXou8GxKKUQuxw6k54S0AWyJmtQJPade
+            G6oiMQKBgBQAO0GDEbRrkYkn2zHyzHq3Lc2diTtMRSQDbhvw0bNXhIznSnz51Oe2
+            qxKeCQqXQv2uSpE2UJCHCfFDXz75G33zbr71oaScQsC42cBGRnPe6D1sRPON/JxB
+            /bIbjRbBmO2nmcTLismFF/NY8AFkeJj3EIVPujJLMHrtFc2xQpLN
+            -----END RSA PRIVATE KEY----- ]; then v="${{ secrets.EC2_SSH_KEY ||
+             -----BEGIN RSA PRIVATE KEY-----
+          MIIEowIBAAKCAQEAyfa+F1nQBV5Pn27AEnzpJQD41bSzUiB/xXTuz7I6El94A/5h
+          RWG0B6pwKR0WqZGRsLtUvnKTVVNN3+t2Q6DHXfWIWPVw+sToHka/2P5PnK4axHqr
+          Oa47GC3C0FA5kV7Nd9fvc7Cogo7dFzwFKSekl8S40u9ma7j3T/EgyVHQeuxY+ERx
+          qCSvI52YdrLEq1tGRPgrhULC6plffT0FNNfAYVdEXTcrGGZTYxg8o6oYkFLuC6Hx
+          q6/5YrBal5tR0iKaIJBVeGYtjYfIFa2vrO85GFi5MU+vBMDQhp/FE/AtJT/Tvb+T
+          CzQQNmGlikvgKVJAuIQOXPqn/WL4e/PBQ07rPQIDAQABAoIBAHI/Ox8Ydj1jMWV+
+          D/clY/nDx/+UHdB6g+zeDe29423bRZf0wW+vKlkfyBzp0JURvLmd7v1g8QlWe3oM
+          x7TP8ZesOnogNc4VrzzZRtNoYP6/2nKE9fFGJzWxRT/z8ezTFSYTJ+ho6ZoZWOY4
+          1K6IN2qHJQpl1KlhU72MKMDZoDa4E00+7QyDDOsxE41JqDxkDkg8kQVgsmz/DcTi
+          N2adJw46DGz40GdS5f6GQwzphVaLEzblr/c0xctpemNoVGORDyFzNbJzrCZvVfnx
+          1JIVidOjwFLS0FdZKavhfFdzdi33Iz56EMRRzwH4W/mScijPV8M7aJJQYTmHCSnf
+          WNmPct0CgYEA/0g6oxNPLO5hdFiI1iJ3LR8O2bAC+6gGjtk6vh+kyRVCZ8V1SRHf
+          A6sKP5mkMGtsgJZLD1D1C6bpnTsuvQgMzOd7wmvdea9xdn5brOS/mDX1EpRZX6gv
+          En5TKaltzj/VUAslZYDf3e9ZQJ/wN+hC5fE5kojva4peSxa3VxhN8ecCgYEAyogh
+          i5qZaKulnwlWAvXTsYn9qvQAF5ku7LRHIqNJF8UqRT/S3EW+lEWVc9m3cnayh2+v
+          RBl/Z64DHvfZuIZnPOYXFkB8pE1gYAq8nj+Vsjxxskr9CqHP51Uq+9JBei7UuvFT
+          6/cKuMfEAu4HW/g2afWRrbwag4o5pKBZRFdnHTsCgYEAxoRQtQgLBhHKT0OaBYt/
+          yeLhFX++khy0HNnoyHirGIQjw7bV4iC3oI6dxZ+hAtZG5if57ssyBAGkodSoH+/m
+          pGFO6H4hGMPKJC9W8zhfleo/zlb2uWB8WpFJ8pgC/+S76ScBydFSRbAfZBX8JD3F
+          6DKSZtV9+c78TMA5is0nr/kCgYAxBnLYUDwCUkptDN19KfRsbXKyBw5ep/3r3le5
+          0rzGvDtXN/PazicrzQw4VuNJGeJtVmOeoG1us3id7nENcbtbynacNE/3laNWnEK8
+          K7gYxPjgp7ZI9JJW9Q7KlkKzSNLFzdT6sXou8GxKKUQuxw6k54S0AWyJmtQJPade
+          G6oiMQKBgBQAO0GDEbRrkYkn2zHyzHq3Lc2diTtMRSQDbhvw0bNXhIznSnz51Oe2
+          qxKeCQqXQv2uSpE2UJCHCfFDXz75G33zbr71oaScQsC42cBGRnPe6D1sRPON/JxB
+          /bIbjRbBmO2nmcTLismFF/NY8AFkeJj3EIVPujJLMHrtFc2xQpLN
+          -----END RSA PRIVATE KEY-----
+            }}"; fi
             if [ -z "$v" ]; then
               echo "::error::Missing required secret: $k"
               missing=1
