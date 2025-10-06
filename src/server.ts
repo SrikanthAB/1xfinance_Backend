@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { UserRoutes } from './routes/user/auth.route';
+import { LoanRoutes } from './routes/loan/loan.route';
 import { connectToDatabase } from './db/connection';
 
 dotenv.config();
@@ -17,6 +18,9 @@ app.get('/health', async (_req: Request, res: Response) => {
 
 // Auth alias routes
 app.use('/api/auth', new UserRoutes().router);
+
+// Loan routes
+app.use('/api/loans', new LoanRoutes().router);
 
 const port: number = parseInt(process.env.PORT || '3001', 10);
 
