@@ -1,4 +1,5 @@
 import { LoanApplication, ILoanApplication } from "../models/loan.model";
+import { SchedulerService } from "./scheduler.service";
 
 export interface GoldLoanInput {
   goldWeightGrams: number;
@@ -102,9 +103,30 @@ const GOOGLE_PLACES_API_KEY = "AIzaSyDGAaY8lPoOH5jcp6IN2Kut2G7GOpNmaY4";
 const GOOGLE_PLACES_BASE_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json";
 
 export class LoanService {
-  // Fetch real-time gold rate from MetalPriceAPI
+  // Get gold rate from database (fetched daily by scheduler)
   static async fetchGoldRate(): Promise<number> {
-    console.log("fetching gold rate");
+    console.log("fetching gold rate from database");
+    try {
+      const latestRate = await SchedulerService.getLatestGoldRate();
+      
+      if (!latestRate) {
+        console.log("No gold rate found in database, falling back to API");
+        // Fallback to API if no rate in database
+        return await this.fetchGoldRateFromAPI();
+      }
+      
+      console.log("Using stored gold rate:", latestRate.ratePerGram24K);
+      return latestRate.ratePerGram24K;
+    } catch (error) {
+      console.error('Failed to fetch gold rate from database:', error);
+      // Fallback to API if database fails
+      return await this.fetchGoldRateFromAPI();
+    }
+  }
+
+  // Fallback method to fetch gold rate from API (used when database is empty)
+  private static async fetchGoldRateFromAPI(): Promise<number> {
+    console.log("fetching gold rate from API as fallback");
     try {
       const response = await fetch(
         'https://api.metalpriceapi.com/v1/latest?api_key=7fb7df5917d9397377f6942be8d9da21&base=INR&currencies=XAU'
@@ -128,8 +150,8 @@ export class LoanService {
       
       return goldRatePerGram;
     } catch (error) {
-      console.error('Failed to fetch gold rate:', error);
-      // Fallback to static rate if API fails
+      console.error('Failed to fetch gold rate from API:', error);
+      // Final fallback to static rate
       return 4815; // 18K rate as fallback
     }
   }
