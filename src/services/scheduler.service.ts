@@ -4,7 +4,7 @@ import { LoanService } from './loan.service';
 
 export class SchedulerService {
   private static isRunning = false;
-  private static cronJob: cron.ScheduledTask | null = null;
+  private static cronJob: any = null;
 
   // Gold purity multipliers
   private static readonly GOLD_PURITY_MULTIPLIERS = {
