@@ -11,8 +11,9 @@ export interface ILoanApplication extends Document {
   
   // Land/Property Details
   propertyType?: "residential" | "commercial" | "agricultural";
-  propertyAddress?: string;
-  propertyValue?: number;
+  landArea?: string;
+  saleValuePerSqFt?: string;
+  landLocation?: string;
   
   // Vehicle Details
   vehicleType?: "car" | "bike" | "commercial";
@@ -72,8 +73,9 @@ const LoanApplicationSchema = new Schema<ILoanApplication>(
     itemDescription: { type: String, required: false, trim: true },
     
     propertyType: { type: String, enum: ["residential", "commercial", "agricultural"], required: false },
-    propertyAddress: { type: String, required: false, trim: true },
-    propertyValue: { type: Number, required: false, min: 0 },
+    landArea: { type: String, required: false, trim: true },
+    saleValuePerSqFt: { type: String, required: false, trim: true },
+    landLocation: { type: String, required: false, trim: true },
     
     vehicleType: { type: String, enum: ["car", "bike", "commercial"], required: false },
     vehicleMake: { type: String, required: false, trim: true },

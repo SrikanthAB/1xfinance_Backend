@@ -13,6 +13,12 @@ export interface IUser extends Document {
   aadhaarLast4?: string; // only store last 4 digits
   kycOtpAttempts?: number; // count of failed OTP attempts
   aadhaarVerifiedAt?: Date; // timestamp when Aadhaar/KYC was verified
+  // Email verification fields
+  emailVerified?: boolean;
+  emailVerifiedAt?: Date;
+  // Password reset fields
+  passwordResetToken?: string;
+  passwordResetExpires?: Date;
   comparePassword(candidate: string): Promise<boolean>;
   
 }
@@ -30,6 +36,12 @@ const UserSchema = new Schema<IUser>(
     aadhaarLast4: { type: String, required: false, minlength: 4, maxlength: 4 },
     kycOtpAttempts: { type: Number, required: false, default: 0, min: 0 },
     aadhaarVerifiedAt: { type: Date, required: false },
+    // Email verification fields
+    emailVerified: { type: Boolean, required: false, default: false },
+    emailVerifiedAt: { type: Date, required: false },
+    // Password reset fields
+    passwordResetToken: { type: String, required: false },
+    passwordResetExpires: { type: Date, required: false },
   },
   { timestamps: true }
 );

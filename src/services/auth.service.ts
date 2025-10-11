@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import { User, IUser } from "../models/user.model";
 import { sanitizeAadhaar, isValidAadhaar, extractLast4Aadhaar } from "../validators/aadhaar";
+import EmailService from "./email.service";
 
 export interface RegisterInput {
   fullName: string;
@@ -29,6 +30,8 @@ export interface PublicUser {
   kycStatus?: "pending" | "verified" | "rejected";
   aadhaarMasked?: string; // XXXXXXXX1234 when available
   aadhaarVerifiedAt?: Date;
+  emailVerified?: boolean;
+  emailVerifiedAt?: Date;
 }
 
 export interface UpdateUserInput {
@@ -43,6 +46,26 @@ export interface UpdateUserInput {
 export interface VerifyOtpInput {
   aadhaarNumber: string;
   otp: string;
+}
+
+export interface EmailOtpInput {
+  email: string;
+  otp: string;
+}
+
+export interface ForgotPasswordInput {
+  email: string;
+}
+
+export interface VerifyPasswordResetInput {
+  email: string;
+  otp: string;
+}
+
+export interface ResetPasswordInput {
+  email: string;
+  token: string;
+  newPassword: string;
 }
 
 function toPublicUser(user: IUser) {
@@ -67,6 +90,8 @@ function toPublicUserFull(user: IUser): PublicUser {
     kycStatus: user.kycStatus,
     aadhaarMasked,
     aadhaarVerifiedAt: user.aadhaarVerifiedAt,
+    emailVerified: user.emailVerified,
+    emailVerifiedAt: user.emailVerifiedAt,
   };
 }
 
@@ -192,6 +217,189 @@ export class AuthService {
 
     await user.save();
     return toPublicUserFull(user);
+  }
+
+  /**
+   * Send email OTP for email verification
+   */
+  static async sendEmailOTP(email: string): Promise<{ success: boolean; message: string; otp?: string }> {
+    try {
+      // Check if user exists with this email
+      const user = await User.findOne({ email: email.toLowerCase() });
+      if (!user) {
+        return { success: false, message: 'No user found with this email address' };
+      }
+
+      // Check if email is already verified
+      if (user.emailVerified) {
+        return { success: false, message: 'Email is already verified' };
+      }
+
+      // Send OTP via email service
+      const result = await EmailService.sendOTP(email);
+      return result;
+
+    } catch (error: any) {
+      console.error('Send email OTP error:', error);
+      return { success: false, message: 'Failed to send email OTP. Please try again.' };
+    }
+  }
+
+  /**
+   * Verify email OTP
+   */
+  static async verifyEmailOTP(email: string, otp: string): Promise<{ success: boolean; message: string; user?: PublicUser }> {
+    try {
+      // Check if user exists with this email
+      const user = await User.findOne({ email: email.toLowerCase() });
+      if (!user) {
+        return { success: false, message: 'No user found with this email address' };
+      }
+
+      // Check if email is already verified
+      if (user.emailVerified) {
+        return { success: false, message: 'Email is already verified' };
+      }
+
+      // Verify OTP via email service
+      const result = await EmailService.verifyOTP(email, otp);
+      
+      if (result.success) {
+        // Update user's email verification status
+        user.emailVerified = true;
+        user.emailVerifiedAt = new Date();
+        await user.save();
+        
+        return {
+          success: true,
+          message: 'Email verified successfully!',
+          user: toPublicUserFull(user)
+        };
+      }
+
+      return result;
+
+    } catch (error: any) {
+      console.error('Verify email OTP error:', error);
+      return { success: false, message: 'Failed to verify email OTP. Please try again.' };
+    }
+  }
+
+  /**
+   * Resend email OTP (wrapper around sendEmailOTP)
+   */
+  static async resendEmailOTP(email: string): Promise<{ success: boolean; message: string; otp?: string }> {
+    return this.sendEmailOTP(email);
+  }
+
+  /**
+   * Send password reset OTP
+   */
+  static async forgotPassword(input: ForgotPasswordInput): Promise<{ success: boolean; message: string; otp?: string }> {
+    try {
+      // Check if user exists with this email
+      const user = await User.findOne({ email: input.email.toLowerCase() });
+      if (!user) {
+        return { success: false, message: 'No user found with this email address' };
+      }
+
+      // Send password reset OTP via email service
+      const result = await EmailService.sendPasswordResetOTP(input.email);
+      return result;
+
+    } catch (error: any) {
+      console.error('Forgot password error:', error);
+      return { success: false, message: 'Failed to send password reset OTP. Please try again.' };
+    }
+  }
+
+  /**
+   * Verify password reset OTP
+   */
+  static async verifyPasswordResetOTP(input: VerifyPasswordResetInput): Promise<{ success: boolean; message: string; token?: string }> {
+    try {
+      // Check if user exists with this email
+      const user = await User.findOne({ email: input.email.toLowerCase() });
+      if (!user) {
+        return { success: false, message: 'No user found with this email address' };
+      }
+
+      // Verify password reset OTP via email service
+      const result = await EmailService.verifyPasswordResetOTP(input.email, input.otp);
+      
+      if (result.success) {
+        // Store the reset token in user document for additional security
+        user.passwordResetToken = result.token;
+        user.passwordResetExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+        await user.save();
+      }
+
+      return result;
+
+    } catch (error: any) {
+      console.error('Verify password reset OTP error:', error);
+      return { success: false, message: 'Failed to verify password reset OTP. Please try again.' };
+    }
+  }
+
+  /**
+   * Reset password with token
+   */
+  static async resetPassword(input: ResetPasswordInput): Promise<{ success: boolean; message: string; user?: PublicUser }> {
+    try {
+      // Check if user exists with this email
+      const user = await User.findOne({ email: input.email.toLowerCase() });
+      if (!user) {
+        return { success: false, message: 'No user found with this email address' };
+      }
+
+      // Check if reset token exists and is valid
+      if (!user.passwordResetToken || !user.passwordResetExpires) {
+        return { success: false, message: 'No valid password reset request found. Please request a new password reset.' };
+      }
+
+      // Check if token has expired
+      if (user.passwordResetExpires < new Date()) {
+        // Clear expired reset data
+        user.passwordResetToken = undefined;
+        user.passwordResetExpires = undefined;
+        await user.save();
+        return { success: false, message: 'Password reset token has expired. Please request a new password reset.' };
+      }
+
+      // Verify the reset token
+      if (user.passwordResetToken !== input.token) {
+        return { success: false, message: 'Invalid password reset token.' };
+      }
+
+      // Validate new password
+      if (!input.newPassword || input.newPassword.length < 6) {
+        return { success: false, message: 'Password must be at least 6 characters long.' };
+      }
+
+      // Update password
+      user.passwordHash = input.newPassword;
+      user.passwordResetToken = undefined;
+      user.passwordResetExpires = undefined;
+      await user.save();
+
+      return {
+        success: true,
+        message: 'Password reset successfully! You can now login with your new password.',
+        user: toPublicUserFull(user)
+      };
+
+    } catch (error: any) {
+      console.error('Reset password error:', error);
+      return { success: false, message: 'Failed to reset password. Please try again.' };
+    }
+  }
+
+  /**
+   * Resend password reset OTP (wrapper around forgotPassword)
+   */
+  static async resendPasswordResetOTP(email: string): Promise<{ success: boolean; message: string; otp?: string }> {
+    return this.forgotPassword({ email });
   }
 }
 
