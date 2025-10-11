@@ -47,16 +47,17 @@ export class LoanController {
   // Calculate land loan valuation
   async calculateLandValuation(req: Request, res: Response) {
     try {
-      const { propertyType, propertyAddress, propertyValue } = req.body as LandLoanInput;
+      const { propertyType, landArea, saleValuePerSqFt, landLocation } = req.body as LandLoanInput;
       
-      if (!propertyType || !propertyAddress || !propertyValue) {
-        return res.status(400).json({ success: false, message: "Property type, address, and value are required" });
+      if (!propertyType || !landArea || !saleValuePerSqFt || !landLocation) {
+        return res.status(400).json({ success: false, message: "Property type, land area, sale value per sq ft, and land location are required" });
       }
 
       const valuation = LoanService.calculateLandValuation({
         propertyType,
-        propertyAddress,
-        propertyValue
+        landArea,
+        saleValuePerSqFt,
+        landLocation
       });
 
       return res.status(200).json({ success: true, data: valuation });
@@ -117,7 +118,13 @@ export class LoanController {
       }
 
       const { loanType, assetDetails, valuation, loanTerms, branchSelection } = req.body as CreateLoanApplicationInput;
-      
+
+      console.log("loanType", loanType);
+      console.log("assetDetails", assetDetails);
+      console.log("valuation", valuation);
+      console.log("loanTerms", loanTerms);
+      console.log("branchSelection", branchSelection);
+
       if (!loanType || !assetDetails || !valuation || !loanTerms) {
         return res.status(400).json({ success: false, message: "Loan type, asset details, valuation, and loan terms are required" });
       }

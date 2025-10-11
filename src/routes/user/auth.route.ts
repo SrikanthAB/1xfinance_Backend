@@ -36,6 +36,18 @@ export class UserRoutes {
 
     // Send KYC OTP (demo: returns fixed OTP)
     this.router.post("/kyc/send-otp", requireDbReady, requireAuth, AuthController.sendKycOtp.bind(AuthController));
+
+    
+    // Email OTP routes
+    this.router.post("/email/send-otp", requireDbReady, AuthController.sendEmailOTP.bind(AuthController));
+    this.router.post("/email/verify-otp", requireDbReady, AuthController.verifyEmailOTP.bind(AuthController));
+    this.router.post("/email/resend-otp", requireDbReady, AuthController.resendEmailOTP.bind(AuthController));
+
+    // Password reset routes
+    this.router.post("/forgot-password", requireDbReady, AuthController.forgotPassword.bind(AuthController));
+    this.router.post("/verify-password-reset-otp", requireDbReady, AuthController.verifyPasswordResetOTP.bind(AuthController));
+    this.router.post("/reset-password", requireDbReady, AuthController.resetPassword.bind(AuthController));
+    this.router.post("/resend-password-reset-otp", requireDbReady, AuthController.resendPasswordResetOTP.bind(AuthController));
   }
 }
 

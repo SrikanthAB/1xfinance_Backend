@@ -9,8 +9,9 @@ export interface GoldLoanInput {
 
 export interface LandLoanInput {
   propertyType: "residential" | "commercial" | "agricultural";
-  propertyAddress: string;
-  propertyValue: number;
+  landArea: string;
+  saleValuePerSqFt: string;
+  landLocation: string;
 }
 
 export interface VehicleLoanInput {
@@ -175,7 +176,9 @@ export class LoanService {
 
   // Calculate land loan valuation
   static calculateLandValuation(input: LandLoanInput) {
-    const marketValue = input.propertyValue;
+    const landArea = parseFloat(input.landArea);
+    const saleValuePerSqFt = parseFloat(input.saleValuePerSqFt);
+    const marketValue = landArea * saleValuePerSqFt;
     const ltvRatio = LTV_RATIOS.land;
     const maxLoanAmount = Math.floor((marketValue * ltvRatio) / 100);
     
@@ -255,8 +258,9 @@ export class LoanService {
       case "land":
         const landInput = input.assetDetails as LandLoanInput;
         loanData.propertyType = landInput.propertyType;
-        loanData.propertyAddress = landInput.propertyAddress;
-        loanData.propertyValue = landInput.propertyValue;
+        loanData.landArea = landInput.landArea;
+        loanData.saleValuePerSqFt = landInput.saleValuePerSqFt;
+        loanData.landLocation = landInput.landLocation;
         break;
       case "vehicles":
         const vehicleInput = input.assetDetails as VehicleLoanInput;

@@ -5,12 +5,17 @@ import { UserRoutes } from './routes/user/auth.route';
 import { LoanRoutes } from './routes/loan/loan.route';
 import { connectToDatabase } from './db/connection';
 import { SchedulerService } from './services/scheduler.service';
+import BusinessRoutes from './routes/business/business.route';
 
 dotenv.config();
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true,
+}));
+
 app.use(express.json());
 
 app.get('/health', async (_req: Request, res: Response) => {
@@ -67,7 +72,9 @@ app.use('/api/auth', new UserRoutes().router);
 // Loan routes
 app.use('/api/loans', new LoanRoutes().router);
 
-const port: number = parseInt(process.env.PORT || '3001', 10);
+app.use('/api/business', new BusinessRoutes().router);
+
+const port: number = parseInt(process.env.PORT || '8080', 10);
 
 connectToDatabase()
   .then(() => {

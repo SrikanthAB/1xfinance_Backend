@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import AuthService, { LoginInput, RegisterInput, UpdateUserInput, VerifyOtpInput } from "../services/auth.service";
+import AuthService, { LoginInput, RegisterInput, UpdateUserInput, VerifyOtpInput, EmailOtpInput, ForgotPasswordInput, VerifyPasswordResetInput, ResetPasswordInput } from "../services/auth.service";
 
 export class AuthController {
   async register(req: Request, res: Response) {
@@ -108,6 +108,200 @@ export class AuthController {
       }
       // Demo implementation: return static OTP. In production, integrate an SMS/Email provider.
       return res.status(200).json({ success: true, message: "OTP sent", data: { otp: "otp sent successfully" } });
+    } catch (err: any) {
+      return res.status(400).json({ success: false, message: err.message });
+    }
+  }
+
+  /**
+   * Send email OTP for email verification
+   */
+  async sendEmailOTP(req: Request, res: Response) {
+    try {
+      const { email } = req.body;
+      console.log("email", email);
+      
+      if (!email) {
+        return res.status(400).json({ success: false, message: "Email is required" });
+      }
+
+      const result = await AuthService.sendEmailOTP(email);
+      
+      if (result.success) {
+        return res.status(200).json({ 
+          success: true, 
+          message: result.message,
+          ...(result.otp && { data: { otp: result.otp } }) // Include OTP in development
+        });
+      } else {
+        return res.status(400).json({ success: false, message: result.message });
+      }
+    } catch (err: any) {
+      return res.status(400).json({ success: false, message: err.message });
+    }
+  }
+
+  /**
+   * Verify email OTP
+   */
+  async verifyEmailOTP(req: Request, res: Response) {
+    try {
+      const { email, otp } = req.body as EmailOtpInput;
+      
+      if (!email || !otp) {
+        return res.status(400).json({ success: false, message: "Email and OTP are required" });
+      }
+
+      const result = await AuthService.verifyEmailOTP(email, otp);
+      
+      if (result.success) {
+        return res.status(200).json({ 
+          success: true, 
+          message: result.message,
+          data: result.user
+        });
+      } else {
+        return res.status(400).json({ success: false, message: result.message });
+      }
+    } catch (err: any) {
+      return res.status(400).json({ success: false, message: err.message });
+    }
+  }
+
+  /**
+   * Resend email OTP
+   */
+  async resendEmailOTP(req: Request, res: Response) {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ success: false, message: "Email is required" });
+      }
+
+      const result = await AuthService.resendEmailOTP(email);
+      
+      if (result.success) {
+        return res.status(200).json({ 
+          success: true, 
+          message: result.message,
+          ...(result.otp && { data: { otp: result.otp } }) // Include OTP in development
+        });
+      } else {
+        return res.status(400).json({ success: false, message: result.message });
+      }
+    } catch (err: any) {
+      return res.status(400).json({ success: false, message: err.message });
+    }
+  }
+
+  /**
+   * Forgot password - Send password reset OTP
+   */
+  async forgotPassword(req: Request, res: Response) {
+    try {
+      const { email } = req.body as ForgotPasswordInput;
+      
+      if (!email) {
+        return res.status(400).json({ success: false, message: "Email is required" });
+      }
+
+      const result = await AuthService.forgotPassword({ email });
+      
+      if (result.success) {
+        return res.status(200).json({ 
+          success: true, 
+          message: result.message,
+          ...(result.otp && { data: { otp: result.otp } }) // Include OTP in development
+        });
+      } else {
+        return res.status(400).json({ success: false, message: result.message });
+      }
+    } catch (err: any) {
+      return res.status(400).json({ success: false, message: err.message });
+    }
+  }
+
+  /**
+   * Verify password reset OTP
+   */
+  async verifyPasswordResetOTP(req: Request, res: Response) {
+    try {
+      const { email, otp } = req.body as VerifyPasswordResetInput;
+      
+      if (!email || !otp) {
+        return res.status(400).json({ success: false, message: "Email and OTP are required" });
+      }
+
+      const result = await AuthService.verifyPasswordResetOTP({ email, otp });
+      
+      if (result.success) {
+        return res.status(200).json({ 
+          success: true, 
+          message: result.message,
+          data: { token: result.token }
+        });
+      } else {
+        return res.status(400).json({ success: false, message: result.message });
+      }
+    } catch (err: any) {
+      return res.status(400).json({ success: false, message: err.message });
+    }
+  }
+
+  /**
+   * Reset password with token
+   */
+  async resetPassword(req: Request, res: Response) {
+    try {
+      const { email, token, newPassword } = req.body as ResetPasswordInput;
+      
+      if (!email || !token || !newPassword) {
+        return res.status(400).json({ success: false, message: "Email, token, and new password are required" });
+      }
+
+      if (newPassword.length < 6) {
+        return res.status(400).json({ success: false, message: "Password must be at least 6 characters long" });
+      }
+
+      const result = await AuthService.resetPassword({ email, token, newPassword });
+      
+      if (result.success) {
+        return res.status(200).json({ 
+          success: true, 
+          message: result.message,
+          data: result.user
+        });
+      } else {
+        return res.status(400).json({ success: false, message: result.message });
+      }
+    } catch (err: any) {
+      return res.status(400).json({ success: false, message: err.message });
+    }
+  }
+
+  /**
+   * Resend password reset OTP
+   */
+  async resendPasswordResetOTP(req: Request, res: Response) {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ success: false, message: "Email is required" });
+      }
+
+      const result = await AuthService.resendPasswordResetOTP(email);
+      
+      if (result.success) {
+        return res.status(200).json({ 
+          success: true, 
+          message: result.message,
+          ...(result.otp && { data: { otp: result.otp } }) // Include OTP in development
+        });
+      } else {
+        return res.status(400).json({ success: false, message: result.message });
+      }
     } catch (err: any) {
       return res.status(400).json({ success: false, message: err.message });
     }
