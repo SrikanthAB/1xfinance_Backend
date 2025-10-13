@@ -11,15 +11,12 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors({
-  origin: 'http://localhost:3000',
-  credentials: true,
-}));
+app.use(cors());
 
 app.use(express.json());
 
 app.get('/health', async (_req: Request, res: Response) => {
-  res.status(200).json({ status: '1x finance api for this' });
+  res.status(200).json({ status: '1x finance api new this' });
 });
 
 // Admin endpoint to manually trigger gold rate fetch (for testing)
