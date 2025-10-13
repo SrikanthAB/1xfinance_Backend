@@ -74,7 +74,7 @@ app.use('/api/loans', new LoanRoutes().router);
 
 app.use('/api/business', new BusinessRoutes().router);
 
-const port: number = parseInt(process.env.PORT || '8080', 10);
+const port: number = parseInt(process.env.PORT || '3001', 10);
 
 connectToDatabase()
   .then(() => {
