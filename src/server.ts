@@ -16,7 +16,7 @@ app.use(cors());
 app.use(express.json());
 
 app.get('/health', async (_req: Request, res: Response) => {
-  res.status(200).json({ status: '1x finance api new this' });
+  res.status(200).json({ status: '1x finance api new routes this' });
 });
 
 // Admin endpoint to manually trigger gold rate fetch (for testing)
